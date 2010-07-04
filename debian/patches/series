@@ -1,0 +1,3 @@
+fix-makefile-for-debian.diff
+zero-struct-iwr.diff
+wireless-tools-docs.patch
