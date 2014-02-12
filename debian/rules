@@ -3,13 +3,19 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+DPKG_EXPORT_BUILDFLAGS = yes
+include /usr/share/dpkg/default.mk
+
 UDEB_CFLAGS=-Os -I.
 
-build: build-stamp
+build: build-arch build-indep
+build-arch: build-stamp
+build-indep: build-stamp
 build-stamp:
 	dh_testdir
 	$(MAKE) all libiw.a
 	touch build-stamp
+
 
 clean:
 	dh_testdir
@@ -25,8 +31,12 @@ install: build
 	dh_installdirs
 	$(MAKE) install install-static PREFIX="`pwd`/debian/tmp"
 	cp 19-udev-ifrename.rules debian/ifrename.udev
-	dh_link
 	dh_install
+	mkdir -p debian/libiw30/lib/$(DEB_HOST_MULTIARCH)/
+	mkdir -p debian/libiw-dev/usr/lib/$(DEB_HOST_MULTIARCH)/
+	cp debian/tmp/lib/libiw.so.30 debian/libiw30/lib/$(DEB_HOST_MULTIARCH)/libiw.so.30
+	cp debian/tmp/lib/libiw.a debian/libiw-dev/usr/lib/$(DEB_HOST_MULTIARCH)/libiw.a
+	ln -s /lib/$(DEB_HOST_MULTIARCH)/libiw.so.30 debian/libiw-dev/usr/lib/$(DEB_HOST_MULTIARCH)/libiw.so
 	$(MAKE) clean
 	$(MAKE) BUILD_NOLIBM=y CFLAGS="$(UDEB_CFLAGS)" PREFIX="`pwd`/debian/tmp"
 	dh_install -pwireless-tools-udeb iwconfig iwgetid sbin/
